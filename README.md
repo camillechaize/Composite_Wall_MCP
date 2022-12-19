@@ -1,3 +1,8 @@
+> - [Méthode Physique de résolution](#intro)
+> - [Fonctionnement du programme Python](#prog)
+
+<h4 id="intro"></h4>
+
 # Introduction au problème
 
 On étudie l’influence des matériaux à changement de phase (**MCP**) sur l’isolation des batiments.
@@ -16,6 +21,7 @@ On étudie l’influence des matériaux à changement de phase (**MCP**) sur l�
  ## Grandeurs utilisées
 
 | Symbole | Signification | Unité |
+|-----|-----|-----|
 | $H$ | Enthalpie volumique | $J.m^{-3}$ |
 | $h$ | Enthalpie sensible volumique | $J.m^{-3}$ |
 | $T$ | Température | $K$ |
@@ -25,7 +31,7 @@ On étudie l’influence des matériaux à changement de phase (**MCP**) sur l�
 | $L$ | Chaleur latente massique | $J.kg^{-1}$ |
 | $f$ | fraction fondue, liquide | SU |
 | $h_{int}$, $h_{ext}$ | Coefficients de convection | $W.m^{-2}.K^{-1}$ |
-|
+
 
 ___
 
@@ -222,7 +228,7 @@ Soit en utilisant la forme de [(6)](#eqn-6):
 > -  $a_{i-1}=-\gamma_{1}$
 > - $a_{i}=1+\gamma_{1}\left(2-\beta_{2 / 1}\right)$
 > - $a_{i+1}=-\gamma_{1} \cdot p_{1 / 2} \cdot\left(1-\beta_{2 / 1}\right)$
-> - $Q = h_{i}^{t}+\gamma_{1}\cdot\left(1 - \beta_{2 / 1}\right)\cdot \left(\Delta T_{f}\right)_{1}^{2} \cdot p_{1} c_{1}+\eta \cdot\left(f_i^{t}-f_i^{t+1}\right)$
+> - $Q = h_{i}^{t}+\gamma_{1}\cdot\left(1 - \beta_{2 / 1}\right)\cdot \left(\Delta T_{f}\right)_ {1}^{2} \cdot p_{1} c_{1}+\eta \cdot\left(f_i^{t}-f_i^{t+1}\right)$
 
 #### Pour le noeud de droite (matériau 2)
 
@@ -234,7 +240,7 @@ Soit en utilisant la forme de [(6)](#eqn-6):
 > -  $a_{i-1}=-\gamma_{2} \cdot p_{2 / 1} \cdot\left(1-\beta_{1 / 2}\right)$
 > - $a_{i}=1+\gamma_{2}\left(2-\beta_{1 / 2}\right)$
 > - $a_{i+1}=-\gamma_{2}$
-> - $Q = h_{i}^{t}+\gamma_{2}\cdot\left(1 - \beta_{1 / 2}\right)\cdot \left(\Delta T_{f}\right)_{2}^{1} \cdot p_{2} c_{2}+\eta \cdot \left(f_{i}^{t} - f_{i}^{t+1}\right)$
+> - $Q = h_{i}^{t}+\gamma_{2}\cdot\left(1 - \beta_{1 / 2}\right)\cdot \left(\Delta T_{f}\right)_ {2}^{1} \cdot p_{2} c_{2}+\eta \cdot \left(f_{i}^{t} - f_{i}^{t+1}\right)$
 
 
 ## Interface Air/MCP
@@ -522,3 +528,42 @@ $$
 
 > - ${RES}_P = a_Wh_w + a_P h_P + a_Eh_E − h_P^{old} −\rho Lf^{old} +\rho\ Lf_k$
 
+---
+
+<h4 id="prog"></h4>
+
+# Fonctionnement du programme Python
+
+## Librairies/Modules utilisés
+
+- numpy
+- pathlib
+- matplotlib
+- math
+
+## Configuration de l'expérience
+
+Cette partie se passe exclusivement dans le dossier `Config`
+
+1. Ajouter des matériaux dans le fichier `materials_config.csv` (ces matériaux n'ont pas besoin d'être utilisés par la suite)
+2. Configurer le mur dans le fichier `wall_config.csv`:
+  > - chaque ligne correspond à une épaisseur de matériau (le haut correspondant à la gauche du mur)
+  > - le nom du matériau d'une couche doit correspondre à un matériau dans `materials_config.csv`
+  > - l'épaisseur (en m) doit être indiquée sur la colonne de droite pour chaque épaisseur de matériau
+
+3. Configurer certaines données de l'expérience dans le fichier `experiment_config.ini` (se référer aux commentaires présents)
+4. Modifier la loi de température extérieure dans `temperature_config.py`, e.g. si la température extérieure doit être constante:
+```python
+def update_outside_temperature(t: float) -> float:
+    pass
+```
+
+## Simulation
+
+Lancer `main.py`, une barre de chargement indiquant l'avancée du calcul devrait apparaître dans la console. Une fois terminé, une fenêtre matplotlib affiche les résultats de l'expérience. 
+Pour supprimer le darkmode, accéder à `Plot\standard_plot.py` puis supprimer la première ligne de la première fonction:
+
+```python
+def plot_simulation(simulation: Simulation):
+    plt.style.use('dark_background')
+```
