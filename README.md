@@ -1,14 +1,32 @@
-> - [Méthode Physique de résolution](#intro)
-> - [Fonctionnement du programme Python](#prog)
+- Méthode Physique de résolution
+  - [Introduction](#introduction)
+    - [Hypothèses](#hypotheses)
+    - [Grandeurs utilisées](#grandeurs)
+  - [Modélisation du problème](#modelisation)
+    - [Intérieur du MCP](#interieur)
+    - [Interface Solide/MCP](#interface-s-m)
+    - [Interface Air/MCP](#interface-a-m)
+  - [Résolution numérique](#resolution)
+    - [Matrice Globale](#matrice)
+    - [Itérations internes](#iterations)
+    - [Optimisation](#optimisation)
+- Programme Python
+  - [Fonctionnement du programme Python](#programme)
+    - [Librairies\Modules](#librairies)
+    - [Configuration](#configuration)
+    - [Simulation](#simulation)
+    - [Résultats](#resultats)
 
-<h4 id="intro"></h4>
+<h4 id="introduction"></h4>
 
 # Introduction au problème
 
 On étudie l’influence des matériaux à changement de phase (**MCP**) sur l’isolation des batiments.
 
 > ![original image](https://cdn.mathpix.com/snip/images/86JViDn_5w5EE3N9ugJBcKIU_BMChFuT9xcGdamfG_c.original.fullsize.png)
-> Illustration du problème
+> Illustration du problème. On pose un axe x horizontal, orienté de la gzuche vers la droite
+
+<h4 id="hypotheses"></h4>
 
 ## Hypothèses
 - Les transferts thermiques sont supposés __unidimensionnels__
@@ -17,6 +35,8 @@ On étudie l’influence des matériaux à changement de phase (**MCP**) sur l�
 - Les __échanges aux interfaces air/solide__ sont gérés par la __loi de Newton__
 - Le mur est __composite__ et peut comporter __plusieurs MCP__
 - Les __propriétés thermodynamiques du MCP__ sont supposées __constantes__ dans sa phase solide ou dans sa phase liquide (la __conductivité__, la __capacité calorifique volumique__, la __masse volumique__ ne __dépendent que__ de l’__état solide/liquide__ du MCP et non de sa température, pression, etc…)
+
+<h4 id="grandeurs"></h4>
 
  ## Grandeurs utilisées
 
@@ -35,6 +55,8 @@ On étudie l’influence des matériaux à changement de phase (**MCP**) sur l�
 
 ___
 
+<h4 id="modelisation"></h4>
+
 # Modélisation du problème
 
 > On scinde le transfert de chaleur en trois parties:
@@ -43,6 +65,8 @@ ___
 > - à __l’interface Air/MCP__
 
 ___
+
+<h4 id="interieur"></h4>
 
 ## Intérieur du MCP
 
@@ -110,6 +134,7 @@ $$
 
 ___
 
+<h4 id="interface-s-m"></h4>
 
 ## Interface Solide/MCP
 > - ![original image](https://cdn.mathpix.com/snip/images/KrEI-tVByxkjCWQOzmEwIHanUpClseNnoRI_RKBKG3A.original.fullsize.png)
@@ -242,6 +267,7 @@ Soit en utilisant la forme de [(6)](#eqn-6):
 > - $a_{i+1}=-\gamma_{2}$
 > - $Q = h_{i}^{t}+\gamma_{2}\cdot\left(1 - \beta_{1 / 2}\right)\cdot \left(\Delta T_{f}\right)_ {2}^{1} \cdot p_{2} c_{2}+\eta \cdot \left(f_{i}^{t} - f_{i}^{t+1}\right)$
 
+<h4 id="interface-a-m"></h4>
 
 ## Interface Air/MCP
 > - Il y a ici deux interfaces différentes Air/MCP:
@@ -351,8 +377,11 @@ Finalement, en réinjectant dans l’équation [(5)](#eqn-5), traduisant les tra
 ___
 ___
 
+<h4 id="resolution"></h4>
 
 # Résolution Numérique
+
+<h4 id="matrice"></h4>
 
 ## Matrice globale
 Le schéma numérique utilisé est ici implicite. Sa mise sous forme matricelle se fait en considérant un vecteur contenant les enthalpies volumiques de chaque noeud (_de la gauche du mur jusqu’à sa droite_) au temps $t$:
@@ -363,7 +392,21 @@ h_{1}^{t} \\
 \vdots \\
 h_{N}^{t}
 \end{array}\right)
+\tag{V.1}
 $$
+
+De même pour les fractions liquides:
+
+$$
+F_{k}^{t}=\left(\begin{array}{c}
+f_{1, k}^{t} \\
+\vdots \\
+f_{N, k}^{t}
+\end{array}\right)
+\tag{V.2}
+$$
+
+> - $k$ est défini en détail [ici](#iterations)
 
 Pour passer à $t+dt$, il convient alors de résoudre:
 
@@ -410,7 +453,7 @@ $$
 Il convient donc de résoudre le système:
 
 $$
-A \cdot H^{t+d t}=H^{t} + \eta\Delta F + E
+A \cdot H^{t+d t}=H^{t} + \eta\cdot\left(\Delta F_k\right)_ {t+dt}^{t} + E
 $$
 
 ou:
@@ -419,10 +462,13 @@ $$
 A \cdot H^{t+d t}=B
 $$
 
-> - $B = H^{t} + \eta\Delta F + E$
-> - $A$ est une matrice tridiagonale que l’on peut inverser avec l’algorithme de Thomas
+> - $B = H^{t} + \eta\cdot\left(\Delta F_k\right)_ {t+dt}^{t} + E$
+> - $A$ est une matrice tridiagonale
+> - Les solutions de ce système peuvent être obtenues grâce à l’[algorithme de Thomas](https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm)
 
-## Problème d’inconnues
+<h4 id="iterations"></h4>
+
+## Itérations internes: problème d’inconnues
 
 > - Le nouveau terme de fraction liquide étant aussi une inconnue, on ne peut résoudre ce système  « d’un seul coup »: à chaque pas de temps, il conviendra donc de trouver le __nouveau__ vecteur __fraction liquide__
 
@@ -430,7 +476,8 @@ En reprenant l’équation « de base », pour un pas de temps quelconque __fi
 
 $$
 a_Wh_W + a_P h_P + a_Eh_E
-= h_P^{old} +\rho Lf^{old} −\rho Lf_k\ \ \left[2\right]
+= h_P^{old} +\rho Lf^{old} −\rho Lf_k
+\tag{R.1}
 $$
 
 > - $a_W \equiv a_{i-1}$
@@ -441,21 +488,24 @@ A chaque itération (dans un seul pas de temps), on applique un solveur TDMA à 
 Cette __mise à jour__ est __cruciale__ dans cette méthode. Après la 1ère itération, on a :
 
 $$
-a_P h_P = −a_Eh_E − a_Wh_W + h_P^{old} +\rho Lf_l^{old} −\rho Lf_0 \ \
-\left[3\right]
+a_P h_P = −a_Eh_E − a_Wh_W + h_P^{old} +\rho Lf^{old} −\rho Lf_0
+\tag{R.2}
 $$
 
 Donc, après la $(k+1)^{eme}$ itération, on a :
 
-$$
-a_P h_P = −a_Eh_E − a_Wh_W + h_P^{old} +\rho Lf^{old} −\rho Lf_k \ \
-\left[4\right]
-$$
-
-Si un changement de phase se passe au $P^{eme}$ nœud (i.e. $0 < f_k < 1$ ), alors la $k^{eme}$ estimation de la fraction liquide — i.e. $f_k$— doit être mise à jour de sorte que pour la $(k+2)^{eme}$ itération, la partie gauche de [4] soit égale à zéro — grâce au nouveau $f_{k + 1}$ — c’est-à-dire :
+<h4 id='eqn-r-3'></h4>
 
 $$
-0 = −a_Eh_E − a_Wh_W + h_P^{old} +\rho Lf_l^{old} −\rho Lf_k + update\ \left[5\right]
+a_P h_P = −a_Eh_E − a_Wh_W + h_P^{old} +\rho Lf^{old} −\rho Lf_k
+\tag{R.3}
+$$
+
+Si un changement de phase se passe au $P^{eme}$ nœud (i.e. $0 < f_k < 1$ ), alors la $k^{eme}$ estimation de la fraction liquide — i.e. $f_k$— doit être mise à jour de sorte que pour la $(k+2)^{eme}$ itération, la partie gauche de [(R.3)](#eqn-r-3) soit égale à zéro — grâce au nouveau $f_{k + 1}$ — c’est-à-dire :
+
+$$
+0 = −a_Eh_E − a_Wh_W + h_P^{old} +\rho Lf^{old} −\rho Lf_k + update
+\tag{R.4}
 $$
 
 On a donc :
@@ -467,7 +517,7 @@ $$
 L’équation étant utilisée pour la $(k+2)^{eme}$ itération étant :
 
 $$
-a_P h_P = −a_Eh_E − a_Wh_W + h_\rho^{old} +\rho Lf^{old} −\rho Lf_{k + 1}
+a_P h_P = −a_Eh_E − a_Wh_W + h_P^{old} +\rho Lf^{old} −\rho Lf_{k + 1}
 $$
 
 Il vient alors :
@@ -484,9 +534,12 @@ $$
 
 Que l’on peut modifier en :
 
+<h4 id='eqn-r-5'></h4>
+
 $$
 f_{k + 1}
-=f_k +\lambda\frac{a_P h_P}{\rho L}\ \ \left[6\right]
+=f_k +\lambda\frac{a_P h_P}{\rho L}
+\tag{R.5}
 $$
 
 Où $\lambda$ est un coefficient de sous-relaxation qui permet d’atteindre la convergence.
@@ -498,41 +551,48 @@ $$
 f=\left\{\begin{array}{ll}
 0 & \text { si } f_{k+1}<0 \\
 1 & \text { si } f_{k+1}>1
-\end{array}\right. \ \ \left[7\right]
+\end{array}\right.
+\tag{R.6}
 $$
 
 > - Cette correction a deux avantages :
 > - 1. Il n’y a pas besoin de vérifier où et quand appliquer la correction
 > - 2. Il y a une totale et correcte prise en charge des situations quand le front passe d’un nœud à
 un autre.
->- Le secret de cette méthode réside dans la mise à jour de la fraction liquide depuis le vecteur d’enthalpie sensible : [6] était l’équation utilisée. 
+>- Le secret de cette méthode réside dans la mise à jour de la fraction liquide depuis le vecteur d’enthalpie sensible : [(R.5)](#eqn-r-5) remplit ce rôle. 
 
-### Optimisation
+<h4 id="optimisation"></h4>
+
+## Optimisation
 
 Ici, on introduit une modification qui permettra des calculs plus rapides.
 En effet, on n’utilisait pas une information potentiellement importante : si la fraction liquide au nœud $P$ est strictement dans l’intervalle $]0, 1[$ alors, $h_P = 0$, (selon la définition de l’enthalpie [(3)](#eqn-3)). 
-Cette information peut être _forcée_ sur le solveur TDMA en mettant simplement le coefficient $a_P = BIG\left({10}^{15}\right)$ à chaque fois que $0 < f_k < 1$ pour le nœud en question. De cette manière, le solveur TDMA retournera une valeur pour $\left(h_P\right)_{k + 1}$ proche de zéro.
+Cette information peut être _forcée_ sur le solveur TDMA en mettant simplement le coefficient $a_P = BIG\left({10}^{15}\right)$ à chaque fois que $0 < f_k < 1$ pour le nœud en question. De cette manière, le solveur TDMA retournera une valeur pour $\left(h_P\right)_ {k + 1}$ proche de zéro.
 En mettant par la suite $h_P = 0$ on a la nouvelle mise à jour suivante:
 
 $$
-\left(f_l\right)_{k + 1}
-=\frac{−a_Wh_W − a_Eh_E + h_P^{old}}{\rho L} + f^{old}\ \ \left[8\right]
+f_{k + 1}
+=\frac{−a_Wh_W − a_Eh_E + h_P^{old}}{\rho L} + f^{old}
+\tag{R.7}
 $$
 
 Qui ne nécessite pas de coefficient de relaxation. Le nouveau critère de convergence sera :
 
 $$
-\frac{\sum ABS\left({RES}_P\right)}{c_P}< TOL\ \ \left[9\right]
+\frac{\sum ABS\left({RES}_ P\right)}{c_P}< TOL
+\tag{R.8}
 $$
 
 
-> - ${RES}_P = a_Wh_w + a_P h_P + a_Eh_E − h_P^{old} −\rho Lf^{old} +\rho\ Lf_k$
+> - ${RES}_ P = a_Wh_w + a_P h_P + a_Eh_E − h_P^{old} −\rho Lf^{old} +\rho\ Lf_k$
 
 ---
 
-<h4 id="prog"></h4>
+<h4 id="programme"></h4>
 
 # Fonctionnement du programme Python
+
+<h4 id="librairies"></h4>
 
 ## Librairies/Modules utilisés
 
@@ -540,6 +600,8 @@ $$
 - pathlib
 - matplotlib
 - math
+
+<h4 id="configuration"></h4>
 
 ## Configuration de l'expérience
 
@@ -558,6 +620,8 @@ def update_outside_temperature(t: float) -> float:
     pass
 ```
 
+<h4 id="simulation"></h4>
+
 ## Simulation
 
 Lancer `main.py`, une barre de chargement indiquant l'avancée du calcul devrait apparaître dans la console. Une fois terminé, une fenêtre matplotlib affiche les résultats de l'expérience. 
@@ -567,3 +631,16 @@ Pour supprimer le darkmode, accéder à `Plot\standard_plot.py` puis supprimer l
 def plot_simulation(simulation: Simulation):
     plt.style.use('dark_background')
 ```
+
+<h4 id="resultats"></h4>
+
+## Résultats
+
+La fenêtre matplotlib montre 3 graphes:
+
+1. __Température à l'extérieure__ et __Température sur le dernier noeud du mur__ (en $°C$) en fonction du temps _(en secondes)_
+> - ![original image](https://cdn.mathpix.com/snip/images/GVmnSMR4TVGbP-jdR3ZuCZo5ze1rkc36SJed0ijUjEA.original.fullsize.png)
+2. __Flux surfacique de chaleur__ reçu algébriquement par la pièce (en $W.m^{-2}$) par le mur en fonction du temps: un flux positif signifie qu'une climatisation a été utilisée pour maintenir la pièce à la même température, un flux négatif signifie qu'un radiateur a été utilisé.
+> - ![original image](https://cdn.mathpix.com/snip/images/OnEzqoUR0Fbg591DYSxvFHDb3se5lYAp6x-VbEABrZM.original.fullsize.png)
+3. __Évolution spatiale de(s) frontière(s) solide/liquide__ en fonction du temps _(en secondes)_: en ordonnée correspond la position spatiale de la frontière dans le mur. Si le mur ne contient pas de MCP, ce graphe est vierge.
+> - ![original image](https://cdn.mathpix.com/snip/images/eqdgWjG6ek28AYDzGeyeptYwT0_hq9S9hVRJmCbqhZE.original.fullsize.png)
