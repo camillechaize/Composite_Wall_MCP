@@ -436,12 +436,12 @@ h_{1}^{t} \\
 h_{N}^{t}
 \end{array}\right)+\eta\cdot
 \left(\begin{array}{c}
-f_{1}^{t}-f_{1}^{t+d t} \\
+f_{1}^{t}-f_{1, k}^{t+dt} \\
 \vdots \\
 \vdots \\
 \vdots \\
 \vdots \\
-f_{N}^{t}-f_{N}^{t+d t}
+f_{N}^{t}-f_{N, k}^{t+d t}
 \end{array}\right)+E
 $$
 
