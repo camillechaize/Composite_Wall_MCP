@@ -609,9 +609,9 @@ Cette partie se passe exclusivement dans le dossier `Config`
 
 1. Ajouter des matériaux dans le fichier `materials_config.csv` (ces matériaux n'ont pas besoin d'être utilisés par la suite)
 2. Configurer le mur dans le fichier `wall_config.csv`:
-  > - chaque ligne correspond à une épaisseur de matériau (le haut correspondant à la gauche du mur)
+  > - chaque ligne correspond à une épaisseur de matériau (la dernière ligne correspondra à la couche la plus à droite du mur)
   > - le nom du matériau d'une couche doit correspondre à un matériau dans `materials_config.csv`
-  > - l'épaisseur (en m) doit être indiquée sur la colonne de droite pour chaque épaisseur de matériau
+  > - l'épaisseur (en $m$) doit être indiquée sur la colonne de droite pour chaque épaisseur de matériau
 
 3. Configurer certaines données de l'expérience dans le fichier `experiment_config.ini` (se référer aux commentaires présents)
 4. Modifier la loi de température extérieure dans `temperature_config.py`, e.g. si la température extérieure doit être constante:
