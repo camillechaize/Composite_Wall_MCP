@@ -12,9 +12,9 @@ def plot_simulation(simulation: Simulation):
                              simulation.experiment.time_steps)
     step = len(simulation.frontier_evolution) // simulation.experiment.max_abscissa_values
     frontiers_arrays = prepare_frontiers_arrays(time_array, simulation.frontier_evolution, step)
-    temperatures_array = prepare_temperatures_arrays(time_array, simulation.wall_inside_temperature_evolution,
-                                                     simulation.outside_temperature_evolution, step)
-
+    temperatures_array = prepare_double_arrays(time_array, simulation.wall_inside_temperature_evolution,
+                                               simulation.outside_temperature_evolution, step)
+    flux_in_array = prepare_simple_arrays(time_array, simulation.in_flux, step)
     # Create two subplots and unpack the output array immediately
     f, axs = plt.subplots(2, 2, figsize=(19, 11))
 
@@ -25,13 +25,16 @@ def plot_simulation(simulation: Simulation):
         axs[1, 0].set_title('Frontier evolution')
         axs[1, 0].set_ylabel(format_scale[1])
 
-    axs[0, 1].plot(tp.sample_of_array(simulation.in_flux, simulation.experiment.max_abscissa_values), marker='.',
+    axs[0, 1].plot(flux_in_array[0], flux_in_array[1], marker='.',
                    label=r'$\phi_{in}$', color='sandybrown')
     axs[0, 1].set_title(f'Surface heat flux in room over {tp.time_formatting(simulation.experiment.duration)}')
+    axs[0, 1].hlines(y=0, xmin=flux_in_array[0][0], xmax=flux_in_array[0][-1], color='white', linestyle='-')
+    axs[0, 1].fill_between(flux_in_array[0], flux_in_array[1], where=(flux_in_array[1] > 0), color='cyan', alpha=0.3)
+    axs[0, 1].fill_between(flux_in_array[0], flux_in_array[1], where=(flux_in_array[1] < 0), color='coral', alpha=0.3)
     axs[0, 1].legend()
 
-    axs[0, 0].scatter(temperatures_array[0], temperatures_array[1] - 273.15, marker=".", label=r'$T_{w,int}$',
-                      color='aqua')
+    axs[0, 0].plot(temperatures_array[0], temperatures_array[1] - 273.15, marker=".", label=r'$T_{w,int}$',
+                   color='aqua')
     axs[0, 0].plot(temperatures_array[0], temperatures_array[2] - 273.15, marker=".", label=r'$T_{out}$', color='coral')
     axs[0, 0].legend()
 
@@ -49,8 +52,15 @@ def prepare_frontiers_arrays(time_array, frontiers_evolutions: list, pas: int):
     return np.transpose(np.array(frontiers_tracked))
 
 
-def prepare_temperatures_arrays(time_array, in_temp: np.array, out_temp: np.array, pas: int):
-    temperatures_kept = []
+def prepare_double_arrays(time_array, in_temp: np.array, out_temp: np.array, pas: int):
+    values_kept = []
     for i in range(0, len(in_temp), pas):
-        temperatures_kept.append([time_array[i], in_temp[i], out_temp[i]])
-    return np.transpose(np.array(temperatures_kept))
+        values_kept.append([time_array[i], in_temp[i], out_temp[i]])
+    return np.transpose(np.array(values_kept))
+
+
+def prepare_simple_arrays(time_array, values_array: np.array, pas: int):
+    values_kept = []
+    for i in range(0, len(values_array), pas):
+        values_kept.append([time_array[i], values_array[i]])
+    return np.transpose(np.array(values_kept))

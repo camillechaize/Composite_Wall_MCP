@@ -18,27 +18,23 @@ class Simulation:
         self.outside_temperature_evolution = np.empty(experiment.time_steps, dtype=np.float64)
         self.wall_inside_temperature_evolution = np.empty(experiment.time_steps, dtype=np.float64)
         self.out_flux = []
-        self.in_flux = []
+        self.in_flux = np.empty(experiment.time_steps, dtype=np.float64)
 
     def simulate(self):
         run_simulation(self.experiment, self.temp_distribution, self.sensible_enthalpy_distribution,
                        self.full_enthalpy_distribution, self.melt_fraction_distribution, self.frontier_evolution,
-                       self.wall_inside_temperature_evolution, self.outside_temperature_evolution)
-        self.in_flux = self.experiment.h_int * (
-                    self.wall_inside_temperature_evolution - self.experiment.inside_temperature)
+                       self.wall_inside_temperature_evolution, self.outside_temperature_evolution, self.in_flux)
 
 
 def run_simulation(experiment: Experiment,
                    temp_distribution, sensible_enthalpy_distribution, full_enthalpy_distribution,
                    melt_fraction_distribution, frontier_evolution, wall_inside_temperature_evolution,
-                   outside_temperature_evolution):
+                   outside_temperature_evolution, in_flux):
     initialize_experiment(temp_distribution, sensible_enthalpy_distribution, melt_fraction_distribution,
                           experiment)
 
     # Loop over iterations until end of experiment
     for t in range(experiment.time_steps):
-        calculate_all_cells_temperature(temp_distribution, sensible_enthalpy_distribution, experiment)
-
         cit.loading_bar(t, experiment.time_steps - 1)
 
         update_conditions(t * experiment.dt, experiment)
@@ -49,9 +45,10 @@ def run_simulation(experiment: Experiment,
         # Save full enthalpy
         calculate_full_enthalpy(full_enthalpy_distribution, sensible_enthalpy_distribution, melt_fraction_distribution,
                                 experiment)
-        # enthalpy_save[t] = full_enthalpy_distribution
 
+        calculate_all_cells_temperature(temp_distribution, sensible_enthalpy_distribution, experiment)
         wall_inside_temperature_evolution[t] = temp_distribution[-1]
+        in_flux[t] = (calculate_in_flux(experiment, temp_distribution[-1], melt_fraction_distribution[-1]))
 
 
 def prepare_diagonals(experiment, melt_fraction_distribution):
@@ -265,6 +262,13 @@ def calculate_cell_temperature(enthalpy: float, material: Pcm) -> float:
         return material.fusion_temp + enthalpy / (material.rho_l * material.c_l)
     else:
         return material.fusion_temp + enthalpy / (material.rho_s * material.c_s)
+
+
+def calculate_in_flux(experiment: Experiment, last_node_temperature: float, last_node_melt_fraction: float) -> float:
+    lamb = last_node_melt_fraction * experiment.wall.material_repartition[-1].lambda_l + \
+           (1 - last_node_melt_fraction) * experiment.wall.material_repartition[-1].lambda_s
+    phi = (2 * lamb - experiment.dx * experiment.h_int) / (2 * lamb + experiment.dx * experiment.h_int)
+    return experiment.h_int * (1 + phi) * (last_node_temperature - experiment.inside_temperature) / 2
 
 
 def update_conditions(t: float, experiment: Experiment):
