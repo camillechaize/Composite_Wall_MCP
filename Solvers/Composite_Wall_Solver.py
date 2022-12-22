@@ -211,11 +211,14 @@ def change_coefficients(matrices, new_melt_fraction_vector: np.array):
 def initialize_experiment(temp_distribution, sensible_enthalpy_distribution, melt_fraction_distribution, experiment):
     # Temperature distribution
     for i in range(experiment.num_nodes):
-        temp_distribution[i] = 273.15 + 20
+        temp_distribution[i] = experiment.inside_temperature
 
     # Melt fraction distribution
     for i in range(0, experiment.num_nodes):
-        melt_fraction_distribution[i] = 0.0
+        if experiment.wall.material_repartition[i].fusion_temperature < temp_distribution[i]:
+            melt_fraction_distribution[i] = 1.0
+        else:
+            melt_fraction_distribution[i] = 0.0
 
     # Enthalpy distribution
     calculate_all_cells_enthalpy_temp(temp_distribution, sensible_enthalpy_distribution, experiment)
