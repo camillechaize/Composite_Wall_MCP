@@ -1,10 +1,12 @@
+import numpy as np
 from Tools.csv_tool import read_csv
+from matplotlib import colors
 
 
 class PhaseChangeMaterial:
     def __init__(self, name: str, fusion_temp: float, rho_l: float, lambda_l: float, c_l: float, latent_heat: float,
                  rho_s: float,
-                 lambda_s: float, c_s: float):
+                 lambda_s: float, c_s: float, solid_color: np.array, liquid_color: np.array):
         self.name = name
         # Material properties
         self.fusion_temp = fusion_temp
@@ -20,6 +22,9 @@ class PhaseChangeMaterial:
         self.alpha_s = self.lambda_s / (self.rho_s * self.c_s)
         self.n = self.rho_l * self.latent_heat  # Used in calculations
 
+        self.solid_color = colors.to_rgba_array(solid_color)
+        self.liquid_color = colors.to_rgba_array(liquid_color)
+
 
 def create_pcm_list_from_csv(csv_path: str) -> list[PhaseChangeMaterial]:
     pcm_list = []
@@ -33,5 +38,7 @@ def create_pcm_list_from_csv(csv_path: str) -> list[PhaseChangeMaterial]:
                                             latent_heat=float(pcm[5]),
                                             rho_s=float(pcm[6]),
                                             lambda_s=float(pcm[7]),
-                                            c_s=float(pcm[8])))
+                                            c_s=float(pcm[8]),
+                                            solid_color=str(pcm[9]),
+                                            liquid_color=str(pcm[10])))
     return pcm_list

@@ -1,5 +1,7 @@
 import math
 import numpy as np
+from Classes.Wall import Wall
+from matplotlib.lines import Line2D
 
 
 def time_formatting(seconds: float) -> str:
@@ -33,3 +35,18 @@ def sample_of_array(array, n):
     for i in range(n):
         result.append(array[array.shape[0] // n * i])
     return np.array(result)
+
+
+def build_wall_legend(wall: Wall):
+    materials_used = []
+    lines = []
+    labels = []
+    for layer in wall.wall_materials:
+        if layer not in materials_used:
+            lines.append(Line2D([0], [0], color=layer.solid_color, lw=4))
+            labels.append(f'{layer.name} (solid)')
+            if layer.fusion_temp < 1000:
+                lines.append(Line2D([0], [0], color=layer.liquid_color, lw=4))
+                labels.append(f'{layer.name} (liquid)')
+
+    return lines, labels

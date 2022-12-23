@@ -15,6 +15,7 @@ class Simulation:
                                                    dtype=np.float64)  # Total enthalpies of cells: H = h + r.L.f
         self.melt_fraction_distribution = np.empty(experiment.num_nodes, dtype=np.float64)
         self.frontier_evolution = []
+        self.materials_melt_distance_evolution = []
         self.outside_temperature_evolution = np.empty(experiment.time_steps, dtype=np.float64)
         self.wall_inside_temperature_evolution = np.empty(experiment.time_steps, dtype=np.float64)
         self.out_flux = []
@@ -23,25 +24,28 @@ class Simulation:
     def simulate(self):
         run_simulation(self.experiment, self.temp_distribution, self.sensible_enthalpy_distribution,
                        self.full_enthalpy_distribution, self.melt_fraction_distribution, self.frontier_evolution,
+                       self.materials_melt_distance_evolution,
                        self.wall_inside_temperature_evolution, self.outside_temperature_evolution, self.in_flux)
 
 
 def run_simulation(experiment: Experiment,
                    temp_distribution, sensible_enthalpy_distribution, full_enthalpy_distribution,
-                   melt_fraction_distribution, frontier_evolution, wall_inside_temperature_evolution,
+                   melt_fraction_distribution, frontier_evolution, materials_melt_distance_evolution, wall_inside_temperature_evolution,
                    outside_temperature_evolution, in_flux):
     initialize_experiment(temp_distribution, sensible_enthalpy_distribution, melt_fraction_distribution,
                           experiment)
 
     # Loop over iterations until end of experiment
     for t in range(experiment.time_steps):
-        cit.loading_bar(t, experiment.time_steps - 1)
+
+        if t % 1000 == 0 or t == experiment.time_steps - 1:
+            cit.loading_bar(t, experiment.time_steps - 1)
 
         update_conditions(t * experiment.dt, experiment)
         outside_temperature_evolution[t] = experiment.outside_temperature
 
         calculate_step_time(prepare_diagonals(experiment, melt_fraction_distribution), experiment,
-                            sensible_enthalpy_distribution, melt_fraction_distribution, frontier_evolution)
+                            sensible_enthalpy_distribution, melt_fraction_distribution, frontier_evolution, materials_melt_distance_evolution)
         # Save full enthalpy
         calculate_full_enthalpy(full_enthalpy_distribution, sensible_enthalpy_distribution, melt_fraction_distribution,
                                 experiment)
@@ -141,7 +145,7 @@ def prepare_diagonals(experiment, melt_fraction_distribution):
 
 
 def calculate_step_time(matrices: tuple, experiment: Experiment, sensible_enthalpy_distribution,
-                        melt_fraction_distribution, frontier_evolution):
+                        melt_fraction_distribution, frontier_evolution, materials_melt_distance_evolution):
     # Set the (k=0)th fraction to initial fraction (i.e. the one calculated at the end of previous step_time)
     new_enthalpy_distribution = sensible_enthalpy_distribution.copy()
     new_melt_fraction_vector = melt_fraction_distribution.copy()
@@ -163,7 +167,7 @@ def calculate_step_time(matrices: tuple, experiment: Experiment, sensible_enthal
         new_melt_fraction_vector = calculate_fraction_iteration(new_enthalpy_distribution,
                                                                 new_melt_fraction_vector, matrices, experiment)
         if has_converged(new_enthalpy_distribution_save, new_enthalpy_distribution, experiment.tolerance):
-            read_frontier(new_melt_fraction_vector, frontier_evolution, experiment)
+            read_frontier(new_melt_fraction_vector, frontier_evolution, materials_melt_distance_evolution, experiment)
             break
 
     # Save new fraction and new enthalpy distribution
@@ -215,7 +219,7 @@ def initialize_experiment(temp_distribution, sensible_enthalpy_distribution, mel
 
     # Melt fraction distribution
     for i in range(0, experiment.num_nodes):
-        if experiment.wall.material_repartition[i].fusion_temperature < temp_distribution[i]:
+        if experiment.wall.material_repartition[i].fusion_temp < temp_distribution[i]:
             melt_fraction_distribution[i] = 1.0
         else:
             melt_fraction_distribution[i] = 0.0
@@ -287,7 +291,8 @@ def has_converged(previous_iteration_enthalpy: np.array, new_iteration_enthalpy:
     return -tolerance < (total_new_enthalpy - total_previous_enthalpy) < tolerance
 
 
-def read_frontier(melt_fraction, frontier_evolution_array: list, experiment: Experiment):
+def read_frontier(melt_fraction, frontier_evolution_array: list, materials_melt_distance_evolution: list,
+                  experiment: Experiment):
     frontier_evolution_array.append([])
     for i in range(experiment.num_nodes - 1):
         if 0 < melt_fraction[i] < 1:
@@ -298,3 +303,80 @@ def read_frontier(melt_fraction, frontier_evolution_array: list, experiment: Exp
         elif (melt_fraction[i] == 1 and melt_fraction[i + 1] == 0) or (
                 melt_fraction[i] == 0 and melt_fraction[i + 1] == 1):
             frontier_evolution_array[-1].append((i + 1) * experiment.dx)
+
+    materials_melt_distance_evolution.append([])  # [[timestep 1], [[material 1], ..., [[start phase node, distance, phase: O solid], ...]]]
+    # Fill distances of phases for each material
+    k = 0
+    # Loop over composites in the wall
+    total_length = 0.0
+    for composite, cells_num_composite in enumerate(experiment.wall.cells_number_by_layer):
+        materials_melt_distance_evolution[-1].append([])  # Add element (for current step time) corresponding to material iterated
+        for i in range(k, k + cells_num_composite):
+            distance = [0]
+            phase = [0]
+            add_phase = False
+            if i == k:
+                if (melt_fraction[i] == int(melt_fraction[i])) and (melt_fraction[i + 1] == int(melt_fraction[i + 1])) and (
+                        melt_fraction[i] == 1 - melt_fraction[i + 1]):
+                    distance = [experiment.dx]
+                    phase = [int(melt_fraction[i])]
+                    add_phase = True
+                # First node of the material: check if melting
+                elif 0 < melt_fraction[i] < 1:
+                    # by assuming the phase on the right is the same that the i+1 node: (if i+1 node melting, arbitrary solid)
+                    distance = [experiment.dx * (
+                            int(melt_fraction[i + 1]) * (1 - melt_fraction[i]) + (1 - int(melt_fraction[i + 1])) * melt_fraction[i])]
+                    phase = [1 - int(melt_fraction[i + 1])]
+                    add_phase = True
+            elif i == k + cells_num_composite - 1:
+                add_phase = True
+                # Last node of the material: check if melting
+                if 0 < melt_fraction[i] < 1:
+                    # by assuming the phase on the right is the same that the i-1 node: (if i+1 node melting, arbitrary solid)
+                    phase = [int(melt_fraction[i - 1]), 1 - int(melt_fraction[i - 1])]
+                    distance = [experiment.dx * ((1 - phase[0]) * (1 - melt_fraction[i]) + phase[0] * melt_fraction[i]),
+                                experiment.dx * (phase[0] * (1 - melt_fraction[i]) + (1 - phase[0]) * melt_fraction[i])]
+                else:
+                    if not materials_melt_distance_evolution[-1][-1]:
+                        distance = [experiment.dx * (i + 1 - k)]
+                    else:
+                        distance = [experiment.dx * (i + 1) - total_length]
+                    phase = [int(melt_fraction[i])]
+            elif 0 < melt_fraction[i] < 1:
+                add_phase = True
+                # If phase is only in the node and not neighbours nodes
+                if melt_fraction[i + 1] == melt_fraction[i - 1]:
+                    phase = [1 - int(melt_fraction[i + 1])]
+                    # Check if it's the first frontier in material
+                    if not materials_melt_distance_evolution[-1][-1]:
+                        phase = [1 - phase[0], phase[0]]
+                        distance = [experiment.dx * (i - k),
+                                    experiment.dx * ((phase[0]) * (1 - melt_fraction[i]) + (1 - phase[0]) * melt_fraction[i])]
+                    else:
+                        distance = [experiment.dx * (1 - phase[0]) * (1 - melt_fraction[i]) + (phase[0]) * melt_fraction[i]]
+                # else distance is well-defined
+                else:
+                    if melt_fraction[i - 1] == 1 or melt_fraction[i + 1] == 0:
+                        phase = [1]
+
+                    # Check if it's the first frontier in material
+                    if not materials_melt_distance_evolution[-1][-1]:
+                        distance = [experiment.dx * (i + ((1 - phase[0]) * (1 - melt_fraction[i]) + phase[0] * melt_fraction[i]) - k)]
+                    else:
+                        distance = [experiment.dx * (i + ((1 - phase[0]) * (1 - melt_fraction[i]) + phase[0] * melt_fraction[i])) - total_length]
+            elif (melt_fraction[i] == int(melt_fraction[i])) and (melt_fraction[i + 1] == int(melt_fraction[i + 1])) and (
+                    melt_fraction[i] == 1 - melt_fraction[i + 1]):
+                # Check if it's the first frontier in material
+                phase = [int(melt_fraction[i])]
+                if not materials_melt_distance_evolution[-1][-1]:
+                    distance = [experiment.dx * (i + ((1 - phase[0]) * (1 - melt_fraction[i]) + phase[0] * melt_fraction[i]) - k)]
+                else:
+                    distance = [experiment.dx * (i + ((1 - phase[0]) * (1 - melt_fraction[i]) + phase[0] * melt_fraction[i])) - total_length]
+                add_phase = True
+            # Add distance of phase to array
+            if add_phase:
+                for p in range(len(phase)):
+                    total_length += distance[p]
+                    materials_melt_distance_evolution[-1][-1].append([i, distance[p], phase[p], total_length])
+
+        k += cells_num_composite
