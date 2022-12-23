@@ -22,7 +22,7 @@ def plot_simulation(simulation: Simulation):
     # Create two subplots and unpack the output array immediately
     f, axs = plt.subplots(2, 2, figsize=ratio)
 
-    axs[0, 1].plot(flux_in_array[0], flux_in_array[1], marker='.',
+    axs[0, 1].plot(flux_in_array[0], flux_in_array[1], linewidth=1,
                    label=r'$\phi_{in}$ in $W.m^{-2}$', color='sandybrown')
     axs[0, 1].set_title(f'Surface heat flux in room over ${tp.time_formatting(simulation.experiment.duration)}$')
     axs[0, 1].set_ylabel(f'Surface heat flux in $W.m^{-2}$')
@@ -31,9 +31,9 @@ def plot_simulation(simulation: Simulation):
     axs[0, 1].fill_between(flux_in_array[0], flux_in_array[1], where=(flux_in_array[1] < 0), color='coral', alpha=0.3)
     axs[0, 1].legend()
 
-    axs[0, 0].plot(temperatures_array[0], temperatures_array[1] - 273.15, marker=".", label=r'$T_{w,int}$',
+    axs[0, 0].plot(temperatures_array[0], temperatures_array[1] - 273.15, linewidth=1, label=r'$T_{w,int}$',
                    color='aqua')
-    axs[0, 0].plot(temperatures_array[0], temperatures_array[2] - 273.15, marker=".", label=r'$T_{out}$', color='coral')
+    axs[0, 0].plot(temperatures_array[0], temperatures_array[2] - 273.15, linewidth=1, label=r'$T_{out}$', color='coral')
     axs[0, 0].set_ylabel(f'Temperature in $°C$')
     axs[0, 0].set_title(f'Temperature evolution over ${tp.time_formatting(simulation.experiment.duration)}$')
     axs[0, 0].legend()
