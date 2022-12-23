@@ -43,6 +43,7 @@ def build_wall_legend(wall: Wall):
     labels = []
     for layer in wall.wall_materials:
         if layer not in materials_used:
+            materials_used.append(layer)
             lines.append(Line2D([0], [0], color=layer.solid_color, lw=4))
             labels.append(f'{layer.name} (solid)')
             if layer.fusion_temp < 1000:
