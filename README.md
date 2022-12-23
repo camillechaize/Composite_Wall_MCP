@@ -639,8 +639,8 @@ def plot_simulation(simulation: Simulation):
 La fenêtre matplotlib montre 3 graphes:
 
 1. __Température à l'extérieure__ et __Température sur le dernier noeud du mur__ (en $°C$) en fonction du temps _(en secondes)_
-> - ![original image](https://cdn.mathpix.com/snip/images/GVmnSMR4TVGbP-jdR3ZuCZo5ze1rkc36SJed0ijUjEA.original.fullsize.png)
+> - ![original image](https://cdn.mathpix.com/snip/images/Oz8ViieK3qeF3zbWVXW0eObF6-P0h1CpHlhSYMAU1Zo.original.fullsize.png)
 2. __Flux surfacique de chaleur__ reçu algébriquement par la pièce (en $W.m^{-2}$) par le mur en fonction du temps: un flux positif signifie qu'une climatisation a été utilisée pour maintenir la pièce à la même température, un flux négatif signifie qu'un radiateur a été utilisé.
-> - ![original image](https://cdn.mathpix.com/snip/images/OnEzqoUR0Fbg591DYSxvFHDb3se5lYAp6x-VbEABrZM.original.fullsize.png)
-3. __Évolution spatiale de(s) frontière(s) solide/liquide__ en fonction du temps _(en secondes)_: en ordonnée correspond la position spatiale de la frontière dans le mur. Si le mur ne contient pas de MCP, ce graphe est vierge.
-> - ![original image](https://cdn.mathpix.com/snip/images/eqdgWjG6ek28AYDzGeyeptYwT0_hq9S9hVRJmCbqhZE.original.fullsize.png)
+> - ![original image](https://cdn.mathpix.com/snip/images/Dfz4qJBds0iCozt_FpSpJguQSBA_6RbNsU9PI4DT3As.original.fullsize.png)
+3. __Évolution spatiale de(s) frontière(s) solide/liquide__ en fonction du temps _(en secondes)_: en ordonnée correspond la distribution des matériaux avec leurs phases.
+> - ![original image](https://cdn.mathpix.com/snip/images/WDnFlI5NshQnfGQs2aGys9w4R-BXARonpATprx15mFg.original.fullsize.png)
