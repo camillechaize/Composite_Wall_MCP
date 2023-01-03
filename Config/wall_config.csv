@@ -1,3 +1,4 @@
 name,thickness (in m)
-Wall_PCM,0.12
-Concrete,0.05
+Wall_PCM,0.05
+Concrete,0.10
+Sapin,0.05
