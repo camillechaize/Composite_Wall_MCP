@@ -643,4 +643,4 @@ La fenêtre matplotlib montre 3 graphes:
 2. __Flux surfacique de chaleur__ reçu algébriquement par la pièce (en $W.m^{-2}$) par le mur en fonction du temps: un flux positif signifie qu'une climatisation a été utilisée pour maintenir la pièce à la même température, un flux négatif signifie qu'un radiateur a été utilisé.
 > - ![original image](https://cdn.mathpix.com/snip/images/Dfz4qJBds0iCozt_FpSpJguQSBA_6RbNsU9PI4DT3As.original.fullsize.png)
 3. __Évolution spatiale de(s) frontière(s) solide/liquide__ en fonction du temps _(en secondes)_: en ordonnée correspond la distribution des matériaux avec leurs phases.
-> - ![original image](https://cdn.mathpix.com/snip/images/WDnFlI5NshQnfGQs2aGys9w4R-BXARonpATprx15mFg.original.fullsize.png)
+> - ![original image](https://cdn.mathpix.com/snip/images/QmQTU7s8ncJDzSG2T4wBsIBtATuLCya2HSJBFq4EWtM.original.fullsize.png)
