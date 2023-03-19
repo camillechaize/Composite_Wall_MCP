@@ -1,3 +1,5 @@
+from typing import List
+
 import Classes.Material
 from Tools.csv_tool import read_csv
 from Classes.Material import create_pcm_list_from_csv as c_pcm
@@ -25,7 +27,7 @@ class Wall:
 
 
 def get_materials_in_wall(wall_csv_path: str, materials_csv_path: str) -> (
-        list[Classes.Material.PhaseChangeMaterial], list[float]):
+        List[Classes.Material.PhaseChangeMaterial], List[float]):
     all_materials_available = c_pcm(materials_csv_path)
     materials_in_wall, thicknesses = [], []
     wall_layers = read_csv(wall_csv_path)

@@ -1,4 +1,6 @@
 import numpy as np
+from typing import List
+
 from Tools.csv_tool import read_csv
 from matplotlib import colors
 
@@ -26,7 +28,7 @@ class PhaseChangeMaterial:
         self.liquid_color = colors.to_rgba_array(liquid_color)
 
 
-def create_pcm_list_from_csv(csv_path: str) -> list[PhaseChangeMaterial]:
+def create_pcm_list_from_csv(csv_path: str) -> List[PhaseChangeMaterial]:
     pcm_list = []
     pcm_settings = read_csv(csv_path)
     for pcm in pcm_settings:
