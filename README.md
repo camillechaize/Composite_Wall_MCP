@@ -146,11 +146,11 @@ ___
 En traduisant la __continuité du flux de chaleur__ et la __continuité de la température__ à __l’interface__, on obtient:
 
 $$
-\left.\left.\lambda_{1} \cdot \frac{\partial T_{1}}{\partial x}\right)_{x_{int}}=\lambda_{2} \cdot \frac{\partial T_{2}}{\partial x}\right)_{x_{int}}
+\left.\left.\lambda_{1} \cdot \frac{\partial T_{1}}{\partial x}\right)_ {x_{int}}=\lambda_{2} \cdot \frac{\partial T_{2}}{\partial x}\right)_ {x_{int}}
 $$
 
 $$
-T_{\text {int }}=T_{1}\left(x_{\text {int }}\right)=T_{2}\left(x_{\text {int }}\right)
+T_{\text {int}}=T_{1}\left(x_{\text {int }}\right)=T_{2}\left(x_{\text {int }}\right)
 $$
 
 Que l’on discrétise en:
@@ -160,7 +160,7 @@ $$
 $$
 
 $$
-T_{i n t}=\frac{T_{1}(N)+\overline{T}_{1}(N+1)}{2}=\frac{T_{2}(1)+\overline{T}_{2}(0)}{2}
+T_{int}=\frac{T_{1}(N)+\overline{T}_ {1}(N+1)}{2}=\frac{T_{2}(1)+\overline{T}_ {2}(0)}{2}
 $$
 
 > - ![original image](https://cdn.mathpix.com/snip/images/9QTZGQGU5VY1lZlDuFz4JWIhsPQIyKTYAVG7Vf-XltI.original.fullsize.png)
@@ -244,7 +244,7 @@ On reprend l’équation [(5)](#eqn-5) traduisant les transferts, et l’on réi
 #### Pour le noeud de gauche (matériau 1)
 
 $$
--\gamma_{1} \cdot h_{i-1}^{t+1}+\left[1+\gamma_{1}\left(2-\beta_{2 / 1}\right)\right] \cdot h_{i}^{t+1}-\left[\gamma_{1} \cdot p_{1 / 2} \cdot\left(1-\beta_{2 / 1}\right)\right] \cdot h_{i+1}^{t+1}=h_{i}^{t}+\gamma_{1}\cdot\left(1 - \beta_{2 / 1}\right) \cdot \left(\Delta T_{f}\right)_{1}^{2} \cdot p_{1} c_{1}+\eta \cdot \left(f_{i}^{t} - f_{i}^{t+1}\right)
+-\gamma_{1} \cdot h_{i-1}^{t+1}+\left[1+\gamma_{1}\left(2-\beta_{2 / 1}\right)\right] \cdot h_{i}^{t+1}-\left[\gamma_{1} \cdot p_{1 / 2} \cdot\left(1-\beta_{2 / 1}\right)\right] \cdot h_{i+1}^{t+1}=h_{i}^{t}+\gamma_{1}\cdot\left(1 - \beta_{2 / 1}\right) \cdot \left(\Delta T_{f}\right)_ {1}^{2} \cdot p_{1} c_{1}+\eta \cdot \left(f_{i}^{t} - f_{i}^{t+1}\right)
 $$
 
 > - $\gamma_{j}=\alpha_{j} R$
@@ -258,7 +258,7 @@ Soit en utilisant la forme de [(6)](#eqn-6):
 #### Pour le noeud de droite (matériau 2)
 
 $$
--\left[\gamma_{2} \cdot p_{2 / 1} \cdot\left(1-\beta_{1 / 2}\right)\right]\cdot h_{i-1}^{t+1}+\left[1+\gamma_{2}\left(2-\beta_{1 / 2}\right)\right] \cdot h_{i}^{t+1} -\gamma_{2} \cdot h_{i+1}^{t+1}=h_{i}^{t}+\gamma_{2}\cdot\left(1 - \beta_{1 / 2}\right)\cdot \left(\Delta T_{f}\right)_{2}^{1} \cdot p_{2} c_{2}+\eta \cdot \left(f_{i}^{t} - f_{i}^{t+1}\right)
+-\left[\gamma_{2} \cdot p_{2 / 1} \cdot\left(1-\beta_{1 / 2}\right)\right]\cdot h_{i-1}^{t+1}+\left[1+\gamma_{2}\left(2-\beta_{1 / 2}\right)\right] \cdot h_{i}^{t+1} -\gamma_{2} \cdot h_{i+1}^{t+1}=h_{i}^{t}+\gamma_{2}\cdot\left(1 - \beta_{1 / 2}\right)\cdot \left(\Delta T_{f}\right)_ {2}^{1} \cdot p_{2} c_{2}+\eta \cdot \left(f_{i}^{t} - f_{i}^{t+1}\right)
 $$
 
 Soit en utilisant la forme de [(6)](#eqn-6):
@@ -282,7 +282,7 @@ Soit en utilisant la forme de [(6)](#eqn-6):
 En exprimant la continuité du flux de chaleur à l’interface ( $x = x_{int}$ ) :
 
 $$
-\overrightarrow{j_{th}(x_{int})}=-\lambda \cdot \left.\frac{\partial T(x)}{\partial x} \right|_{x =x_{int}} \cdot \vec{x} =h_{\text {ext}} \cdot\left(T_{\text {ext}} - T_{\text {interface}}\right)\cdot \vec{x}
+\overrightarrow{j_{th}(x_{int})}=-\lambda \cdot \left.\frac{\partial T(x)}{\partial x} \right|_ {x =x_{int}} \cdot \vec{x} =h_{\text {ext}} \cdot\left(T_{\text {ext}} - T_{\text {interface}}\right)\cdot \vec{x}
 $$
 
 > - $T(x)$ correspond exclusivement à la température dans le MCP
