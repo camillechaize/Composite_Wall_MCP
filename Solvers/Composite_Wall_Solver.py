@@ -18,20 +18,20 @@ class Simulation:
         self.materials_melt_distance_evolution = []
         self.outside_temperature_evolution = np.empty(experiment.time_steps, dtype=np.float64)
         self.wall_inside_temperature_evolution = np.empty(experiment.time_steps, dtype=np.float64)
-        self.out_flux = []
+        self.temp_tracker = np.empty(experiment.time_steps, dtype=np.float64)
         self.in_flux = np.empty(experiment.time_steps, dtype=np.float64)
 
     def simulate(self):
         run_simulation(self.experiment, self.temp_distribution, self.sensible_enthalpy_distribution,
                        self.full_enthalpy_distribution, self.melt_fraction_distribution, self.frontier_evolution,
                        self.materials_melt_distance_evolution,
-                       self.wall_inside_temperature_evolution, self.outside_temperature_evolution, self.in_flux)
+                       self.wall_inside_temperature_evolution, self.outside_temperature_evolution, self.in_flux, self.temp_tracker)
 
 
 def run_simulation(experiment: Experiment,
                    temp_distribution, sensible_enthalpy_distribution, full_enthalpy_distribution,
                    melt_fraction_distribution, frontier_evolution, materials_melt_distance_evolution, wall_inside_temperature_evolution,
-                   outside_temperature_evolution, in_flux):
+                   outside_temperature_evolution, in_flux, temp_tracker):
     initialize_experiment(temp_distribution, sensible_enthalpy_distribution, melt_fraction_distribution,
                           experiment)
 
@@ -53,6 +53,7 @@ def run_simulation(experiment: Experiment,
         calculate_all_cells_temperature(temp_distribution, sensible_enthalpy_distribution, experiment)
         wall_inside_temperature_evolution[t] = temp_distribution[-1]
         in_flux[t] = (calculate_in_flux(experiment, temp_distribution[-1], melt_fraction_distribution[-1]))
+        temp_tracker[t] = temp_distribution[60]
 
 
 def prepare_diagonals(experiment, melt_fraction_distribution):
@@ -215,7 +216,7 @@ def change_coefficients(matrices, new_melt_fraction_vector: np.array):
 def initialize_experiment(temp_distribution, sensible_enthalpy_distribution, melt_fraction_distribution, experiment):
     # Temperature distribution
     for i in range(experiment.num_nodes):
-        temp_distribution[i] = experiment.inside_temperature
+        temp_distribution[i] = experiment.wall_initial_temperature
 
     # Melt fraction distribution
     for i in range(0, experiment.num_nodes):
@@ -286,9 +287,8 @@ def clamp(number: float, smallest, largest): return max(smallest, min(number, la
 
 
 def has_converged(previous_iteration_enthalpy: np.array, new_iteration_enthalpy: np.array, tolerance) -> bool:
-    total_previous_enthalpy = np.sum(previous_iteration_enthalpy)
-    total_new_enthalpy = np.sum(new_iteration_enthalpy)
-    return -tolerance < (total_new_enthalpy - total_previous_enthalpy) < tolerance
+    enthalpy_difference = np.sum(np.abs(previous_iteration_enthalpy-new_iteration_enthalpy))
+    return -tolerance < enthalpy_difference < tolerance
 
 
 def read_frontier(melt_fraction, frontier_evolution_array: list, materials_melt_distance_evolution: list,

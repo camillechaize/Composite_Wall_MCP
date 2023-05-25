@@ -14,6 +14,8 @@ class Experiment:
         self.tolerance = exp_settings.getfloat('Precision', 'tolerance')
         self.time_steps = int(self.duration // self.dt)
 
+        self.wall_initial_temperature = exp_settings.getfloat('Wall', 'wall_initial_temperature') + 273.15
+
         self.h_int = exp_settings.getfloat('Room', 'h_int')
         self.inside_temperature = exp_settings.getfloat('Room', 'inside_temperature') + 273.15
 

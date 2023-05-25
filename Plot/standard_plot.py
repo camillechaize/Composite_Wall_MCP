@@ -31,9 +31,11 @@ def plot_simulation(simulation: Simulation):
     axs[0, 1].fill_between(flux_in_array[0], flux_in_array[1], where=(flux_in_array[1] < 0), color='coral', alpha=0.3)
     axs[0, 1].legend()
 
+    temp_tracker_array = prepare_simple_arrays(time_array, simulation.temp_tracker, step)
     axs[0, 0].plot(temperatures_array[0], temperatures_array[1] - 273.15, linewidth=1, label=r'$T_{w,int}$',
                    color='aqua')
     axs[0, 0].plot(temperatures_array[0], temperatures_array[2] - 273.15, linewidth=1, label=r'$T_{out}$', color='coral')
+    axs[0, 0].plot(temp_tracker_array[0], temp_tracker_array[1] - 273.15, linewidth=1, label=r'$T_{middle}$', color='green')
     axs[0, 0].set_ylabel(f'Temperature in $°C$')
     axs[0, 0].set_title(f'Temperature evolution over ${tp.time_formatting(simulation.experiment.duration)}$')
     axs[0, 0].legend()
