@@ -14,6 +14,7 @@ class Experiment:
         self.tolerance = exp_settings.getfloat('Precision', 'tolerance')
         self.time_steps = int(self.duration // self.dt)
 
+        self.wall_surface = exp_settings.getfloat('Wall', 'wall_surface')
         self.wall_initial_temperature = exp_settings.getfloat('Wall', 'wall_initial_temperature') + 273.15
 
         self.h_int = exp_settings.getfloat('Room', 'h_int')
@@ -30,6 +31,10 @@ class Experiment:
         self.r = self.dt / (self.dx ** 2)
 
         self.max_abscissa_values = exp_settings.getint('Plot', 'max_abscissa_values')
+        self.number_of_apartments = exp_settings.getint('Plot', 'number_of_apartments')
+        self.nuclear_power_plant_power = exp_settings.getint('Plot', 'nuclear_power_plant_power')
+        self.heater_cooler_efficiency = exp_settings.getfloat('Plot', 'heater_cooler_efficiency')
+        self.energy_cost = exp_settings.getfloat('Plot', 'energy_cost')
 
 
 def get_experience_settings(experience_ini_path: str):

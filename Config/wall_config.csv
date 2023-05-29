@@ -1,2 +1,5 @@
 name,thickness (in m)
-Wax,0.08
+Platre,0.05
+Sapin,0.05
+Concrete,0.10
+Extruded_polystyrene,0.10

@@ -334,7 +334,7 @@ def read_frontier(melt_fraction, frontier_evolution_array: list, materials_melt_
                 if 0 < melt_fraction[i] < 1:
                     # by assuming the phase on the right is the same that the i-1 node: (if i+1 node melting, arbitrary solid)
                     phase = [int(melt_fraction[i - 1]), 1 - int(melt_fraction[i - 1])]
-                    distance = [experiment.dx * ((1 - phase[0]) * (1 - melt_fraction[i]) + phase[0] * melt_fraction[i]),
+                    distance = [experiment.dx * (i+(1 - phase[0]) * (1 - melt_fraction[i]) + phase[0] * melt_fraction[i])-total_length,
                                 experiment.dx * (phase[0] * (1 - melt_fraction[i]) + (1 - phase[0]) * melt_fraction[i])]
                 else:
                     if not materials_melt_distance_evolution[-1][-1]:

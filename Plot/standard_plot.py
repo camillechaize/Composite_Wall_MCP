@@ -19,15 +19,22 @@ def plot_simulation(simulation: Simulation):
     temperatures_array = prepare_double_arrays(time_array, simulation.wall_inside_temperature_evolution,
                                                simulation.outside_temperature_evolution, step)
     flux_in_array = prepare_simple_arrays(time_array, simulation.in_flux, step)
+    surface_energy_needed = integral(simulation.in_flux, simulation.experiment.dt)
+    total_energy_one_apartment = surface_energy_needed * simulation.experiment.wall_surface / (
+            3600 * 1000 * simulation.experiment.heater_cooler_efficiency)
+    cost = total_energy_one_apartment * simulation.experiment.energy_cost
+    total_power = total_energy_one_apartment * (3600 * 1000) * simulation.experiment.number_of_apartments / (simulation.experiment.duration * 1e6)
+    number_power_plants = total_power / simulation.experiment.nuclear_power_plant_power
     # Create two subplots and unpack the output array immediately
     f, axs = plt.subplots(2, 2, figsize=ratio)
 
     axs[0, 1].plot(flux_in_array[0], flux_in_array[1], linewidth=1,
                    label=r'$\phi_{in}$ in $W.m^{-2}$', color='sandybrown')
-    axs[0, 1].set_title(f'Surface heat flux in room over ${tp.time_formatting(simulation.experiment.duration)}$')
+    axs[0, 1].set_title(
+        f'Surface heat flux in room over ${tp.time_formatting(simulation.experiment.duration)}$\n {total_energy_one_apartment:.2f} kWh, {cost:.2f}€ \n CITY {total_power:.2f}MW or {number_power_plants:.3f} Nuclear Power Plants')
     axs[0, 1].set_ylabel(f'Surface heat flux in $W.m^{-2}$')
     axs[0, 1].hlines(y=0, xmin=flux_in_array[0][0], xmax=flux_in_array[0][-1], color='white', linestyle='-')
-    axs[0, 1].fill_between(flux_in_array[0], flux_in_array[1], where=(flux_in_array[1] > 0), color='cyan', alpha=0.3)
+    axs[0, 1].fill_between(flux_in_array[0], flux_in_array[1], where=(flux_in_array[1] > 0), color='cyan', alpha=1)
     axs[0, 1].fill_between(flux_in_array[0], flux_in_array[1], where=(flux_in_array[1] < 0), color='coral', alpha=0.3)
     axs[0, 1].legend()
 
@@ -75,3 +82,7 @@ def prepare_simple_arrays(time_array, values_array: np.array, pas: int):
     for i in range(0, len(values_array), pas):
         values_kept.append([time_array[i], values_array[i]])
     return np.transpose(np.array(values_kept))
+
+
+def integral(y_array: np.array, step):
+    return sum(abs(y_value * step) for y_value in y_array)
