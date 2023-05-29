@@ -280,7 +280,10 @@ def calculate_in_flux(experiment: Experiment, last_node_temperature: float, last
 
 
 def update_conditions(t: float, experiment: Experiment):
-    experiment.outside_temperature = experiment.outside_temperature_evolution(t)
+    if experiment.external_weather_data:
+        experiment.outside_temperature = experiment.update_outside_temperature(t)
+    else:
+        experiment.outside_temperature = experiment.outside_temperature_evolution(t)
 
 
 def clamp(number: float, smallest, largest): return max(smallest, min(number, largest))

@@ -1,12 +1,16 @@
 from Classes.Wall import Wall
 from Config import temperature_config
 from Tools.ini_tool import read_ini
+from Tools.csv_tool import read_csv
+from datetime import datetime
 
 
 class Experiment:
-    def __init__(self, experience_ini_path: str, wall_csv_path: str, materials_csv_path: str):
+    def __init__(self, experience_ini_path: str, wall_csv_path: str, materials_csv_path: str, weather_data_path: str = ''):
         # Get values from config file
         exp_settings = get_experience_settings(experience_ini_path)
+
+        self.external_weather_data = exp_settings.getboolean('Data', 'external_weather_data')
 
         self.num_nodes = exp_settings.getint('Precision', 'num_nodes')
         self.dt = exp_settings.getfloat('Precision', 'delta_time')
@@ -36,7 +40,32 @@ class Experiment:
         self.heater_cooler_efficiency = exp_settings.getfloat('Plot', 'heater_cooler_efficiency')
         self.energy_cost = exp_settings.getfloat('Plot', 'energy_cost')
 
+        # External Data
+        if self.external_weather_data:
+            self.weather_data, self.data_step_time = get_weather_data(weather_data_path)
+
+    def update_outside_temperature(self, t: float):
+        # Find nearest data points
+        index = int(t // self.data_step_time)
+        if index < len(self.weather_data) - 1:
+            # Interpolate
+            x = (t - self.data_step_time * index) / self.data_step_time
+            return self.weather_data[index][1] * (1-x) + self.weather_data[index + 1][1] * x
+        else:
+            return self.weather_data[-1][1]
+
 
 def get_experience_settings(experience_ini_path: str):
     experience_settings = read_ini(experience_ini_path)
     return experience_settings
+
+
+def get_weather_data(weather_data_path: str):
+    assert (weather_data_path != '')
+    weather_data = read_csv(weather_data_path)
+    origin = datetime.strptime(str(weather_data[0][0]), '%Y-%m-%dT%H:%M:%S')  # Set origin to 0 sec
+    for time in weather_data:
+        time[0] = (datetime.strptime(str(time[0]), '%Y-%m-%dT%H:%M:%S') - origin).seconds
+        time[1] = 273.15 + float(time[1])
+    step_time = weather_data[1][0] - weather_data[0][0]
+    return weather_data, step_time

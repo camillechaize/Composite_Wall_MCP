@@ -1,5 +1,5 @@
 name,thickness (in m)
-Platre,0.05
+Wall_PCM,0.05
 Sapin,0.05
-Concrete,0.10
+Concrete,0.07
 Extruded_polystyrene,0.10
