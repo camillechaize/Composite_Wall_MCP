@@ -605,7 +605,7 @@ $$
 
 ## Configuration de l'expérience
 
-Cette partie se passe exclusivement dans le dossier `Config`
+Cette partie se passe exclusivement dans le dossier `Config` (et `Weather_Data` si la température extérieure varie selon des données pré-enregistrées)
 
 1. Ajouter des matériaux dans le fichier `materials_config.csv` (ces matériaux n'ont pas besoin d'être utilisés par la suite)
 2. Configurer le mur dans le fichier `wall_config.csv`:
@@ -614,11 +614,42 @@ Cette partie se passe exclusivement dans le dossier `Config`
   > - l'épaisseur (en $m$) doit être indiquée sur la colonne de droite pour chaque épaisseur de matériau
 
 3. Configurer certaines données de l'expérience dans le fichier `experiment_config.ini` (se référer aux commentaires présents)
-4. Modifier la loi de température extérieure dans `temperature_config.py`, e.g. si la température extérieure doit être constante:
+4. Modifier la loi de température extérieure (sinon utiliser [température pré-enregistrée](#external-weather-data)) dans `temperature_config.py`, e.g. si la température extérieure doit être constante:
 ```python
 def update_outside_temperature(t: float) -> float:
     pass
 ```
+
+Dans le fichier `main.py`, modifier l'appel de Experiment de sorte à ce qu'il n'y ait que les 3 arguments suivants (contrairement au cas d'une [température pré-enregistrée](#external-weather-data)):
+  ```python
+  E = Experiment(str((current_path / 'Config' / 'experiment_config.ini').resolve()),
+               str((current_path / 'Config' / 'wall_config.csv').resolve()),
+               str((current_path / 'Config' / 'materials_config.csv').resolve()))
+  ```
+
+<h4 id="external-weather-data"></h4>
+
+5. Pour utiliser des données de température externes:
+  Utiliser un fichier CSV sous la forme:
+  
+  ```csv
+  datetime,temperature
+  YYYY-MM-DDTHH:MM:SS,14.1
+  YYYY-MM-DDTHH:MM:SS,14.5
+  YYYY-MM-DDTHH:MM:SS,15.0
+  ```
+  
+  Et le placer dans le dossier `Weather_Data`
+  Dans le fichier `main.py`, modifier l'appel de Experiment:
+  
+  ```python
+  E = Experiment(str((current_path / 'Config' / 'experiment_config.ini').resolve()),
+               str((current_path / 'Config' / 'wall_config.csv').resolve()),
+               str((current_path / 'Config' / 'materials_config.csv').resolve()),
+               str((current_path / 'Weather_Data' / 'NOM_DU_FICHIER_DATA.csv').resolve()))
+  ```
+  
+
 
 <h4 id="simulation"></h4>
 
